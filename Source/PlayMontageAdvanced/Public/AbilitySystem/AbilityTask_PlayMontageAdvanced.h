@@ -153,8 +153,7 @@ public:
 	 *
 	 * @param OwningAbility The ability that owns this task
 	 * @param TaskInstanceName Set to override the name of this task, for later querying
-	 * @param InputParams [OPTIONAL] The parameters to use for montage selection, if InputType is set to Parameters
-	 * @param MontageTag [OPTIONAL] The tag to find montages for, if InputType is set to Interface
+	 * @param InputParams The parameters to use for montage selection
 	 * @param EventTags Any gameplay events matching this tag will activate the EventReceived callback. If empty, all events will trigger callback
 	 * @param Rate Change to play the montage faster or slower
 	 * @param StartSection If not empty, named montage section to start from
@@ -170,10 +169,82 @@ public:
 	 * @param OverrideBlendOutTimeOnCancelAbility If >= 0 it will override the blend out time when ability is cancelled.
 	 * @param OverrideBlendOutTimeOnEndAbility If >= 0 it will override the blend out time when ability ends.
 	 */
-	UFUNCTION(BlueprintCallable, Category="Ability|Tasks", meta = (DisplayName="PlayMontageAdvancedAndWait",
+	UFUNCTION(BlueprintCallable, Category="Ability|Tasks", meta = (DisplayName="PlayMontageAdvancedParamsAndWait",
 		HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE", MontageTag="MontageTag"))
-	static UAbilityTask_PlayMontageAdvanced* CreatePlayMontageAdvancedAndWaitProxy(UGameplayAbility* OwningAbility,
-		FName TaskInstanceName, FMontageAdvancedParams InputParams, FGameplayTag MontageTag,
+	static UAbilityTask_PlayMontageAdvanced* CreatePlayMontageAdvancedParamsAndWaitProxy(UGameplayAbility* OwningAbility,
+		FName TaskInstanceName, FMontageAdvancedParams InputParams,
+		FGameplayTagContainer EventTags, float Rate = 1.f, FName StartSection = NAME_None, bool bStopWhenAbilityEnds = true,
+		float AnimRootMotionTranslationScale = 1.f, float StartTimeSeconds = 0.f,
+		EPlayMontageAdvancedNotifyHandling NotifyHandling = EPlayMontageAdvancedNotifyHandling::Montage,
+		bool bTriggerNotifiesBeforeStartTimeSeconds = true, bool bDrivenMontagesMatchDriverDuration = true,
+		bool bOverrideBlendIn = false, FMontageBlendSettings BlendInOverride = FMontageBlendSettings(),
+		bool bAllowInterruptAfterBlendOut = false, float OverrideBlendOutTimeOnCancelAbility = -1.f,
+		float OverrideBlendOutTimeOnEndAbility = -1.f);
+
+	/**
+	 * Start playing an animation montage on the avatar actor and wait for it to finish
+	 * If StopWhenAbilityEnds is true, this montage will be aborted if the ability ends normally. It is always stopped when the ability is explicitly cancelled.
+	 * On normal execution, OnBlendOut is called when the montage is blending out, and OnCompleted when it is completely done playing
+	 * OnInterrupted is called if another montage overwrites this, and OnCancelled is called if the ability or task is cancelled
+	 *
+	 * @param OwningAbility The ability that owns this task
+	 * @param TaskInstanceName Set to override the name of this task, for later querying
+	 * @param MontageTag The tag to find montages for on the interface
+	 * @param EventTags Any gameplay events matching this tag will activate the EventReceived callback. If empty, all events will trigger callback
+	 * @param Rate Change to play the montage faster or slower
+	 * @param StartSection If not empty, named montage section to start from
+	 * @param bStopWhenAbilityEnds If true, this montage will be aborted if the ability ends normally. It is always stopped when the ability is explicitly cancelled
+	 * @param AnimRootMotionTranslationScale Change to modify size of root motion or set to 0 to block it entirely
+	 * @param bOverrideBlendIn If true apply BlendInOverride settings instead of the settings assigned to the montage
+	 * @param BlendInOverride Settings to use if bOverrideBlendIn is true
+	 * @param StartTimeSeconds Starting time offset in montage, this will be overridden by StartSection if that is also set
+	 * @param NotifyHandling How to handle 'by tag' notifies in the montage
+	 * @param bTriggerNotifiesBeforeStartTimeSeconds If true, notifies clipped by StartTimeSeconds will be triggered even if they are before the start time
+	 * @param bDrivenMontagesMatchDriverDuration If true, all driven montages will run for the same duration as the driver montage
+	 * @param bAllowInterruptAfterBlendOut If true, you can receive OnInterrupted after an OnBlendOut started (otherwise OnInterrupted will not fire when interrupted, but you will not get OnComplete).
+	 * @param OverrideBlendOutTimeOnCancelAbility If >= 0 it will override the blend out time when ability is cancelled.
+	 * @param OverrideBlendOutTimeOnEndAbility If >= 0 it will override the blend out time when ability ends.
+	 */
+	UFUNCTION(BlueprintCallable, Category="Ability|Tasks", meta = (DisplayName="PlayMontageAdvancedInterfaceAndWait",
+		HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE", GameplayTagFilter="MontageTag.", MontageTag="MontageTag"))
+	static UAbilityTask_PlayMontageAdvanced* CreatePlayMontageAdvancedInterfaceAndWaitProxy(UGameplayAbility* OwningAbility,
+		FName TaskInstanceName, FGameplayTag MontageTag,
+		FGameplayTagContainer EventTags, float Rate = 1.f, FName StartSection = NAME_None, bool bStopWhenAbilityEnds = true,
+		float AnimRootMotionTranslationScale = 1.f, float StartTimeSeconds = 0.f,
+		EPlayMontageAdvancedNotifyHandling NotifyHandling = EPlayMontageAdvancedNotifyHandling::Montage,
+		bool bTriggerNotifiesBeforeStartTimeSeconds = true, bool bDrivenMontagesMatchDriverDuration = true,
+		bool bOverrideBlendIn = false, FMontageBlendSettings BlendInOverride = FMontageBlendSettings(),
+		bool bAllowInterruptAfterBlendOut = false, float OverrideBlendOutTimeOnCancelAbility = -1.f,
+		float OverrideBlendOutTimeOnEndAbility = -1.f);
+
+	/**
+	 * Start playing an animation montage on the avatar actor and wait for it to finish
+	 * If StopWhenAbilityEnds is true, this montage will be aborted if the ability ends normally. It is always stopped when the ability is explicitly cancelled.
+	 * On normal execution, OnBlendOut is called when the montage is blending out, and OnCompleted when it is completely done playing
+	 * OnInterrupted is called if another montage overwrites this, and OnCancelled is called if the ability or task is cancelled
+	 *
+	 * @param OwningAbility The ability that owns this task
+	 * @param TaskInstanceName Set to override the name of this task, for later querying
+	 * @param MontageTag The tag to find montages for on the component
+	 * @param EventTags Any gameplay events matching this tag will activate the EventReceived callback. If empty, all events will trigger callback
+	 * @param Rate Change to play the montage faster or slower
+	 * @param StartSection If not empty, named montage section to start from
+	 * @param bStopWhenAbilityEnds If true, this montage will be aborted if the ability ends normally. It is always stopped when the ability is explicitly cancelled
+	 * @param AnimRootMotionTranslationScale Change to modify size of root motion or set to 0 to block it entirely
+	 * @param bOverrideBlendIn If true apply BlendInOverride settings instead of the settings assigned to the montage
+	 * @param BlendInOverride Settings to use if bOverrideBlendIn is true
+	 * @param StartTimeSeconds Starting time offset in montage, this will be overridden by StartSection if that is also set
+	 * @param NotifyHandling How to handle 'by tag' notifies in the montage
+	 * @param bTriggerNotifiesBeforeStartTimeSeconds If true, notifies clipped by StartTimeSeconds will be triggered even if they are before the start time
+	 * @param bDrivenMontagesMatchDriverDuration If true, all driven montages will run for the same duration as the driver montage
+	 * @param bAllowInterruptAfterBlendOut If true, you can receive OnInterrupted after an OnBlendOut started (otherwise OnInterrupted will not fire when interrupted, but you will not get OnComplete).
+	 * @param OverrideBlendOutTimeOnCancelAbility If >= 0 it will override the blend out time when ability is cancelled.
+	 * @param OverrideBlendOutTimeOnEndAbility If >= 0 it will override the blend out time when ability ends.
+	 */
+	UFUNCTION(BlueprintCallable, Category="Ability|Tasks", meta = (DisplayName="PlayMontageAdvancedComponentAndWait",
+		HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE", GameplayTagFilter="MontageTag.", MontageTag="MontageTag"))
+	static UAbilityTask_PlayMontageAdvanced* CreatePlayMontageAdvancedComponentAndWaitProxy(UGameplayAbility* OwningAbility,
+		FName TaskInstanceName, FGameplayTag MontageTag,
 		FGameplayTagContainer EventTags, float Rate = 1.f, FName StartSection = NAME_None, bool bStopWhenAbilityEnds = true,
 		float AnimRootMotionTranslationScale = 1.f, float StartTimeSeconds = 0.f,
 		EPlayMontageAdvancedNotifyHandling NotifyHandling = EPlayMontageAdvancedNotifyHandling::Montage,

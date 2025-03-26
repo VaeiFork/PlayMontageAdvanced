@@ -1,9 +1,9 @@
 ﻿{
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "1.3.0",
+	"VersionName": "1.4.0",
 	"FriendlyName": "PlayMontageAdvanced",
-	"Description": "Adds PlayMontageAdvancedAndWait & PlayMontageByTagAndWait ability task nodes that can play any number of montages on any number of meshes and keep them synced.",
+	"Description": "Adds 3x PlayMontageAdvancedAndWait ability task nodes that can play any number of montages on any number of meshes and keep them synced.",
 	"Category": "Animation",
 	"CreatedBy": "Jared Taylor (Vaei)",
 	"CreatedByURL": "",

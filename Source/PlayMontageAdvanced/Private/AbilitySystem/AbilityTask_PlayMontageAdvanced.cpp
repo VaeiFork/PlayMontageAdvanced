@@ -11,6 +11,7 @@
 #include "PlayMontageByTagInterface.h"
 #include "AbilitySystem/PlayMontageAbilitySystemComponent.h"
 #include "PlayMontageAdvancedLib.h"
+#include "PlayMontageByTagComponent.h"
 #include "Tasks/GameplayTask_WaitDelay.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AbilityTask_PlayMontageAdvanced)
@@ -94,9 +95,9 @@ void UAbilityTask_PlayMontageAdvanced::OnMontageEnded(UAnimMontage* Montage, boo
 	EndTask();
 }
 
-UAbilityTask_PlayMontageAdvanced* UAbilityTask_PlayMontageAdvanced::CreatePlayMontageAdvancedAndWaitProxy(
+UAbilityTask_PlayMontageAdvanced* UAbilityTask_PlayMontageAdvanced::CreatePlayMontageAdvancedParamsAndWaitProxy(
 	UGameplayAbility* OwningAbility, FName TaskInstanceName, FMontageAdvancedParams InputParams,
-	FGameplayTag MontageTag, FGameplayTagContainer EventTags, float Rate,
+	FGameplayTagContainer EventTags, float Rate,
 	FName StartSection, bool bStopWhenAbilityEnds, float AnimRootMotionTranslationScale, float StartTimeSeconds,
 	EPlayMontageAdvancedNotifyHandling NotifyHandling, bool bTriggerNotifiesBeforeStartTimeSeconds,
 	bool bDrivenMontagesMatchDriverDuration, bool bOverrideBlendIn, FMontageBlendSettings BlendInOverride,
@@ -105,31 +106,19 @@ UAbilityTask_PlayMontageAdvanced* UAbilityTask_PlayMontageAdvanced::CreatePlayMo
 {
 	UAbilitySystemGlobals::NonShipping_ApplyGlobalAbilityScaler_Rate(Rate);
 
-	AActor* AvatarActor = OwningAbility->GetAvatarActorFromActorInfo();
+	const AActor* AvatarActor = OwningAbility->GetAvatarActorFromActorInfo();
 	if (!ensure(IsValid(AvatarActor)))
 	{
-		// @todo can it fail IsValid when they get destroyed?
 		return nullptr;
 	}
 
 	FMontageAdvancedParams MontageParams = InputParams;
-	if (!MontageParams.ParamsUsed())
+	if (!ensure(MontageParams.ParamsUsed()))
 	{
-		if (!ensure(AvatarActor->Implements<UPlayMontageByTagInterface>()))
-		{
 #if !UE_BUILD_SHIPPING
-			FMessageLog("PIE").Error(FText::Format(LOCTEXT("PlayMontageAdvanced_NoInterface",
-				"UAbilityTask_PlayMontageAdvanced: Avatar actor {0} does not implement IPlayMontageByTagInterface and no InputParams were passed -- one or the other must be available"), FText::FromString(AvatarActor->GetName())));
+			FMessageLog("PIE").Error(FText::Format(LOCTEXT("PlayMontageAdvanced_InvalidInputParams",
+				"UAbilityTask_PlayMontageAdvanced: Avatar actor {0} was provided InputParams with invalid data"), FText::FromString(AvatarActor->GetName())));
 #endif
-			return nullptr;
-		}
-
-		IPlayMontageByTagInterface* Interface = CastChecked<IPlayMontageByTagInterface>(AvatarActor);
-		const bool bValid = Interface->GetAbilityMontagesByTag(MontageTag, MontageParams);
-		if (!bValid)
-		{
-			return nullptr;
-		}
 	}
 	
 	UAbilityTask_PlayMontageAdvanced* MyObj = NewAbilityTask<UAbilityTask_PlayMontageAdvanced>(OwningAbility, TaskInstanceName);
@@ -151,6 +140,100 @@ UAbilityTask_PlayMontageAdvanced* UAbilityTask_PlayMontageAdvanced::CreatePlayMo
 	MyObj->OverrideBlendOutTimeOnEndAbility = OverrideBlendOutTimeOnEndAbility;
 	
 	return MyObj;
+}
+
+UAbilityTask_PlayMontageAdvanced* UAbilityTask_PlayMontageAdvanced::CreatePlayMontageAdvancedInterfaceAndWaitProxy(
+	UGameplayAbility* OwningAbility, FName TaskInstanceName, FGameplayTag MontageTag, FGameplayTagContainer EventTags,
+	float Rate, FName StartSection, bool bStopWhenAbilityEnds, float AnimRootMotionTranslationScale,
+	float StartTimeSeconds, EPlayMontageAdvancedNotifyHandling NotifyHandling,
+	bool bTriggerNotifiesBeforeStartTimeSeconds, bool bDrivenMontagesMatchDriverDuration, bool bOverrideBlendIn,
+	FMontageBlendSettings BlendInOverride, bool bAllowInterruptAfterBlendOut, float OverrideBlendOutTimeOnCancelAbility,
+	float OverrideBlendOutTimeOnEndAbility)
+{
+	UAbilitySystemGlobals::NonShipping_ApplyGlobalAbilityScaler_Rate(Rate);
+
+	AActor* AvatarActor = OwningAbility->GetAvatarActorFromActorInfo();
+	if (!ensure(IsValid(AvatarActor)))
+	{
+		return nullptr;
+	}
+
+	if (!ensure(AvatarActor->Implements<UPlayMontageByTagInterface>()))
+	{
+#if !UE_BUILD_SHIPPING
+		FMessageLog("PIE").Error(FText::Format(LOCTEXT("PlayMontageAdvanced_NoInterface",
+			"UAbilityTask_PlayMontageAdvanced: Avatar actor {0} does not implement IPlayMontageByTagInterface"), FText::FromString(AvatarActor->GetName())));
+#endif
+		return nullptr;
+	}
+
+	const IPlayMontageByTagInterface* Interface = CastChecked<IPlayMontageByTagInterface>(AvatarActor);
+	FMontageAdvancedParams MontageParams;
+	const bool bValid = Interface->GetAbilityMontagesByTag(MontageTag, MontageParams);
+	if (!bValid)
+	{
+		return nullptr;
+	}
+	
+	if (!ensure(MontageParams.ParamsUsed()))
+	{
+#if !UE_BUILD_SHIPPING
+		FMessageLog("PIE").Error(FText::Format(LOCTEXT("PlayMontageAdvanced_InvalidInterfaceParams",
+			"UAbilityTask_PlayMontageAdvanced: Avatar actor {0} was retrieved InputParams from interface with invalid data"), FText::FromString(AvatarActor->GetName())));
+#endif
+	}
+	
+	return CreatePlayMontageAdvancedParamsAndWaitProxy(OwningAbility, TaskInstanceName, MontageParams, EventTags, Rate,
+		StartSection, bStopWhenAbilityEnds, AnimRootMotionTranslationScale, StartTimeSeconds, NotifyHandling,
+		bTriggerNotifiesBeforeStartTimeSeconds, bDrivenMontagesMatchDriverDuration, bOverrideBlendIn, BlendInOverride,
+		bAllowInterruptAfterBlendOut, OverrideBlendOutTimeOnCancelAbility, OverrideBlendOutTimeOnEndAbility);
+}
+
+UAbilityTask_PlayMontageAdvanced* UAbilityTask_PlayMontageAdvanced::CreatePlayMontageAdvancedComponentAndWaitProxy(
+	UGameplayAbility* OwningAbility, FName TaskInstanceName, FGameplayTag MontageTag, FGameplayTagContainer EventTags,
+	float Rate, FName StartSection, bool bStopWhenAbilityEnds, float AnimRootMotionTranslationScale,
+	float StartTimeSeconds, EPlayMontageAdvancedNotifyHandling NotifyHandling,
+	bool bTriggerNotifiesBeforeStartTimeSeconds, bool bDrivenMontagesMatchDriverDuration, bool bOverrideBlendIn,
+	FMontageBlendSettings BlendInOverride, bool bAllowInterruptAfterBlendOut, float OverrideBlendOutTimeOnCancelAbility,
+	float OverrideBlendOutTimeOnEndAbility)
+{
+		UAbilitySystemGlobals::NonShipping_ApplyGlobalAbilityScaler_Rate(Rate);
+
+	const AActor* AvatarActor = OwningAbility->GetAvatarActorFromActorInfo();
+	if (!ensure(IsValid(AvatarActor)))
+	{
+		return nullptr;
+	}
+
+	const UPlayMontageByTagComponent* Component = AvatarActor->FindComponentByClass<UPlayMontageByTagComponent>();
+	if (!ensure(Component))
+	{
+#if !UE_BUILD_SHIPPING
+		FMessageLog("PIE").Error(FText::Format(LOCTEXT("PlayMontageAdvanced_NoComponent",
+			"UAbilityTask_PlayMontageAdvanced: Avatar actor {0} does have a UPlayMontageByTagComponent"), FText::FromString(AvatarActor->GetName())));
+#endif
+		return nullptr;
+	}
+
+	FMontageAdvancedParams MontageParams;
+	const bool bValid = Component->GetAbilityMontagesByTag(MontageTag, MontageParams);
+	if (!bValid)
+	{
+		return nullptr;
+	}
+	
+	if (!ensure(MontageParams.ParamsUsed()))
+	{
+#if !UE_BUILD_SHIPPING
+		FMessageLog("PIE").Error(FText::Format(LOCTEXT("PlayMontageAdvanced_InvalidCompParams",
+			"UAbilityTask_PlayMontageAdvanced: Avatar actor {0} was retrieved InputParams from component with invalid data"), FText::FromString(AvatarActor->GetName())));
+#endif
+	}
+	
+	return CreatePlayMontageAdvancedParamsAndWaitProxy(OwningAbility, TaskInstanceName, MontageParams, EventTags, Rate,
+		StartSection, bStopWhenAbilityEnds, AnimRootMotionTranslationScale, StartTimeSeconds, NotifyHandling,
+		bTriggerNotifiesBeforeStartTimeSeconds, bDrivenMontagesMatchDriverDuration, bOverrideBlendIn, BlendInOverride,
+		bAllowInterruptAfterBlendOut, OverrideBlendOutTimeOnCancelAbility, OverrideBlendOutTimeOnEndAbility);
 }
 
 float UAbilityTask_PlayMontageAdvanced::PlayDrivenMontageForMesh(UPlayMontageAbilitySystemComponent* ASC, const float Duration, const FDrivenMontagePair& Montage, const bool bReplicate) const
@@ -196,7 +279,7 @@ void UAbilityTask_PlayMontageAdvanced::Activate()
 					{
 						const float StartTime = Notify.GetTime();
 						
-						if (UAnimNotify_ByTag* NotifyByTag = Notify.Notify ? Cast<UAnimNotify_ByTag>(Notify.Notify) : nullptr)
+						if (const UAnimNotify_ByTag* NotifyByTag = Notify.Notify ? Cast<UAnimNotify_ByTag>(Notify.Notify) : nullptr)
 						{
 							FAnimNotifyByTagEvent NotifyByTagEvent = { NotifyByTag->NotifyTag, NotifyByTag->EnsureTriggerNotify, 
 							EPlayMontageAdvancedNotifyType::Notify, Notify.GetTime() };
@@ -249,7 +332,7 @@ void UAbilityTask_PlayMontageAdvanced::Activate()
 			}
 			
 			// Create tasks for notifies
-			UWorld* World = GetWorld();
+			const UWorld* World = GetWorld();
 			for (FAnimNotifyByTagEvent& TagEvent : NotifyByTags)
 			{
 				// Set up timer for notify
@@ -377,7 +460,7 @@ bool UAbilityTask_PlayMontageAdvanced::StopPlayingMontage(float OverrideBlendOut
 		return false;
 	}
 
-	UAnimInstance* AnimInstance = ActorInfo->GetAnimInstance();
+	const UAnimInstance* AnimInstance = ActorInfo->GetAnimInstance();
 	if (AnimInstance == nullptr)
 	{
 		return false;
@@ -510,11 +593,11 @@ void UAbilityTask_PlayMontageAdvanced::OnTimer(FAnimNotifyByTagEvent* TagEvent)
 
 FString UAbilityTask_PlayMontageAdvanced::GetDebugString() const
 {
-	UAnimMontage* PlayingMontage = nullptr;
+	const UAnimMontage* PlayingMontage = nullptr;
 	if (Ability)
 	{
 		const FGameplayAbilityActorInfo* ActorInfo = Ability->GetCurrentActorInfo();
-		UAnimInstance* AnimInstance = ActorInfo->GetAnimInstance();
+		const UAnimInstance* AnimInstance = ActorInfo->GetAnimInstance();
 
 		if (AnimInstance != nullptr)
 		{

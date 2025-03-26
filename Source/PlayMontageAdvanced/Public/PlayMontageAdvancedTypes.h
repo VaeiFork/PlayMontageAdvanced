@@ -7,6 +7,14 @@
 #include "PlayMontageAdvancedTypes.generated.h"
 
 UENUM(BlueprintType)
+enum class EPlayMontageSourceType : uint8
+{
+	Params				UMETA(ToolTip="Use the FMontageAdvancedParams to determine the montages to play"),
+	TagInterface		UMETA(ToolTip="Use the IPlayMontageByTagInterface to determine the montages to play"),
+	TagComponent		UMETA(ToolTip="Use the UPlayMontageByTagComponent to determine the montages to play"),
+};
+
+UENUM(BlueprintType)
 enum class EPlayMontageAdvancedEventType : uint8
 {
 	OnCompleted,

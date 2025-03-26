@@ -59,7 +59,7 @@ void UPlayMontageAbilitySystemComponent::TickComponent(float DeltaTime, ELevelTi
 {
 	if (IsOwnerActorAuthoritative())
 	{
-		for (FGameplayAbilityLocalAnimMontageForMesh& MontageInfo : LocalAnimMontageInfoForMeshes)
+		for (const FGameplayAbilityLocalAnimMontageForMesh& MontageInfo : LocalAnimMontageInfoForMeshes)
 		{
 			AnimMontage_UpdateReplicatedDataForMesh(MontageInfo.Mesh);
 		}
@@ -180,9 +180,9 @@ void UPlayMontageAbilitySystemComponent::CurrentMontageStopForMesh(USkeletalMesh
 	float OverrideBlendOutTime)
 {
 	UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
-	FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
-	UAnimMontage* MontageToStop = AnimMontageInfo.LocalMontageInfo.AnimMontage;
-	bool bShouldStopMontage = AnimInstance && MontageToStop && !AnimInstance->Montage_GetIsStopped(MontageToStop);
+	const FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
+	const UAnimMontage* MontageToStop = AnimMontageInfo.LocalMontageInfo.AnimMontage;
+	const bool bShouldStopMontage = AnimInstance && MontageToStop && !AnimInstance->Montage_GetIsStopped(MontageToStop);
 
 	if (bShouldStopMontage)
 	{
@@ -199,7 +199,7 @@ void UPlayMontageAbilitySystemComponent::CurrentMontageStopForMesh(USkeletalMesh
 
 void UPlayMontageAbilitySystemComponent::StopAllCurrentMontages(float OverrideBlendOutTime)
 {
-	for (FGameplayAbilityLocalAnimMontageForMesh& GameplayAbilityLocalAnimMontageForMesh : LocalAnimMontageInfoForMeshes)
+	for (const FGameplayAbilityLocalAnimMontageForMesh& GameplayAbilityLocalAnimMontageForMesh : LocalAnimMontageInfoForMeshes)
 	{
 		CurrentMontageStopForMesh(GameplayAbilityLocalAnimMontageForMesh.Mesh, OverrideBlendOutTime);
 	}
@@ -208,7 +208,7 @@ void UPlayMontageAbilitySystemComponent::StopAllCurrentMontages(float OverrideBl
 void UPlayMontageAbilitySystemComponent::StopMontageIfCurrentForMesh(USkeletalMeshComponent* InMesh,
 	const UAnimMontage& Montage, float OverrideBlendOutTime)
 {
-	FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
+	const FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
 	if (&Montage == AnimMontageInfo.LocalMontageInfo.AnimMontage)
 	{
 		CurrentMontageStopForMesh(InMesh, OverrideBlendOutTime);
@@ -232,7 +232,7 @@ void UPlayMontageAbilitySystemComponent::CurrentMontageJumpToSectionForMesh(USke
 	FName SectionName)
 {
 	UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
-	FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
+	const FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
 	if ((SectionName != NAME_None) && AnimInstance && AnimMontageInfo.LocalMontageInfo.AnimMontage)
 	{
 		AnimInstance->Montage_JumpToSection(SectionName, AnimMontageInfo.LocalMontageInfo.AnimMontage);
@@ -251,7 +251,7 @@ void UPlayMontageAbilitySystemComponent::CurrentMontageSetNextSectionNameForMesh
 	FName FromSectionName, FName ToSectionName)
 {
 	UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
-	FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
+	const FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
 	if (AnimMontageInfo.LocalMontageInfo.AnimMontage && AnimInstance)
 	{
 		// Set Next Section Name. 
@@ -264,7 +264,7 @@ void UPlayMontageAbilitySystemComponent::CurrentMontageSetNextSectionNameForMesh
 		}
 		else
 		{
-			float CurrentPosition = AnimInstance->Montage_GetPosition(AnimMontageInfo.LocalMontageInfo.AnimMontage);
+			const float CurrentPosition = AnimInstance->Montage_GetPosition(AnimMontageInfo.LocalMontageInfo.AnimMontage);
 			ServerCurrentMontageSetNextSectionNameForMesh(InMesh, AnimMontageInfo.LocalMontageInfo.AnimMontage, CurrentPosition, FromSectionName, ToSectionName);
 		}
 	}
@@ -273,7 +273,7 @@ void UPlayMontageAbilitySystemComponent::CurrentMontageSetNextSectionNameForMesh
 void UPlayMontageAbilitySystemComponent::CurrentMontageSetPlayRateForMesh(USkeletalMeshComponent* InMesh, float InPlayRate)
 {
 	UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
-	FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
+	const FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
 	if (AnimMontageInfo.LocalMontageInfo.AnimMontage && AnimInstance)
 	{
 		// Set Play Rate
@@ -320,7 +320,7 @@ UGameplayAbility* UPlayMontageAbilitySystemComponent::GetAnimatingAbilityFromAny
 
 UGameplayAbility* UPlayMontageAbilitySystemComponent::GetAnimatingAbilityFromMesh(USkeletalMeshComponent* InMesh)
 {
-	FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
+	const FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
 	return AnimMontageInfo.LocalMontageInfo.AnimatingAbility.IsValid() ? AnimMontageInfo.LocalMontageInfo.AnimatingAbility.Get() : nullptr;
 }
 
@@ -330,7 +330,7 @@ TArray<UAnimMontage*> UPlayMontageAbilitySystemComponent::GetCurrentMontages() c
 
 	for (FGameplayAbilityLocalAnimMontageForMesh GameplayAbilityLocalAnimMontageForMesh : LocalAnimMontageInfoForMeshes)
 	{
-		UAnimInstance* AnimInstance = IsValid(GameplayAbilityLocalAnimMontageForMesh.Mesh) 
+		const UAnimInstance* AnimInstance = IsValid(GameplayAbilityLocalAnimMontageForMesh.Mesh) 
 			&& GameplayAbilityLocalAnimMontageForMesh.Mesh->GetOwner() == AbilityActorInfo->AvatarActor ? GameplayAbilityLocalAnimMontageForMesh.Mesh->GetAnimInstance() : nullptr;
 
 		if (GameplayAbilityLocalAnimMontageForMesh.LocalMontageInfo.AnimMontage && AnimInstance 
@@ -345,7 +345,7 @@ TArray<UAnimMontage*> UPlayMontageAbilitySystemComponent::GetCurrentMontages() c
 
 UAnimMontage* UPlayMontageAbilitySystemComponent::GetCurrentMontageForMesh(USkeletalMeshComponent* InMesh)
 {
-	UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
+	const UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
 	FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
 
 	if (AnimMontageInfo.LocalMontageInfo.AnimMontage && AnimInstance
@@ -359,12 +359,12 @@ UAnimMontage* UPlayMontageAbilitySystemComponent::GetCurrentMontageForMesh(USkel
 
 int32 UPlayMontageAbilitySystemComponent::GetCurrentMontageSectionIDForMesh(USkeletalMeshComponent* InMesh)
 {
-	UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
-	UAnimMontage* CurrentAnimMontage = GetCurrentMontageForMesh(InMesh);
+	const UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
+	const UAnimMontage* CurrentAnimMontage = GetCurrentMontageForMesh(InMesh);
 
 	if (CurrentAnimMontage && AnimInstance)
 	{
-		float MontagePosition = AnimInstance->Montage_GetPosition(CurrentAnimMontage);
+		const float MontagePosition = AnimInstance->Montage_GetPosition(CurrentAnimMontage);
 		return CurrentAnimMontage->GetSectionIndexFromPosition(MontagePosition);
 	}
 
@@ -373,13 +373,13 @@ int32 UPlayMontageAbilitySystemComponent::GetCurrentMontageSectionIDForMesh(USke
 
 FName UPlayMontageAbilitySystemComponent::GetCurrentMontageSectionNameForMesh(USkeletalMeshComponent* InMesh)
 {
-	UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
-	UAnimMontage* CurrentAnimMontage = GetCurrentMontageForMesh(InMesh);
+	const UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
+	const UAnimMontage* CurrentAnimMontage = GetCurrentMontageForMesh(InMesh);
 
 	if (CurrentAnimMontage && AnimInstance)
 	{
-		float MontagePosition = AnimInstance->Montage_GetPosition(CurrentAnimMontage);
-		int32 CurrentSectionID = CurrentAnimMontage->GetSectionIndexFromPosition(MontagePosition);
+		const float MontagePosition = AnimInstance->Montage_GetPosition(CurrentAnimMontage);
+		const int32 CurrentSectionID = CurrentAnimMontage->GetSectionIndexFromPosition(MontagePosition);
 
 		return CurrentAnimMontage->GetSectionName(CurrentSectionID);
 	}
@@ -389,12 +389,12 @@ FName UPlayMontageAbilitySystemComponent::GetCurrentMontageSectionNameForMesh(US
 
 float UPlayMontageAbilitySystemComponent::GetCurrentMontageSectionLengthForMesh(USkeletalMeshComponent* InMesh)
 {
-	UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
+	const UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
 	UAnimMontage* CurrentAnimMontage = GetCurrentMontageForMesh(InMesh);
 
 	if (CurrentAnimMontage && AnimInstance)
 	{
-		int32 CurrentSectionID = GetCurrentMontageSectionIDForMesh(InMesh);
+		const int32 CurrentSectionID = GetCurrentMontageSectionIDForMesh(InMesh);
 		if (CurrentSectionID != INDEX_NONE)
 		{
 			TArray<FCompositeSection>& CompositeSections = CurrentAnimMontage->CompositeSections;
@@ -420,7 +420,7 @@ float UPlayMontageAbilitySystemComponent::GetCurrentMontageSectionLengthForMesh(
 
 float UPlayMontageAbilitySystemComponent::GetCurrentMontageSectionTimeLeftForMesh(USkeletalMeshComponent* InMesh)
 {
-	UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
+	const UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
 	UAnimMontage* CurrentAnimMontage = GetCurrentMontageForMesh(InMesh);
 
 	if (CurrentAnimMontage && AnimInstance && AnimInstance->Montage_IsActive(CurrentAnimMontage))
@@ -443,7 +443,7 @@ FGameplayAbilityLocalAnimMontageForMesh& UPlayMontageAbilitySystemComponent::Get
 		}
 	}
 
-	FGameplayAbilityLocalAnimMontageForMesh MontageInfo = FGameplayAbilityLocalAnimMontageForMesh(InMesh);
+	const FGameplayAbilityLocalAnimMontageForMesh MontageInfo = FGameplayAbilityLocalAnimMontageForMesh(InMesh);
 	LocalAnimMontageInfoForMeshes.Add(MontageInfo);
 	return LocalAnimMontageInfoForMeshes.Last();
 }
@@ -459,7 +459,7 @@ FGameplayAbilityRepAnimMontageForMesh& UPlayMontageAbilitySystemComponent::GetGa
 		}
 	}
 
-	FGameplayAbilityRepAnimMontageForMesh RepMontageInfo = FGameplayAbilityRepAnimMontageForMesh(InMesh);
+	const FGameplayAbilityRepAnimMontageForMesh RepMontageInfo = FGameplayAbilityRepAnimMontageForMesh(InMesh);
 	RepAnimMontageInfoForMeshes.Add(RepMontageInfo);
 	return RepAnimMontageInfoForMeshes.Last();
 }
@@ -490,16 +490,16 @@ void UPlayMontageAbilitySystemComponent::AnimMontage_UpdateReplicatedDataForMesh
 void UPlayMontageAbilitySystemComponent::AnimMontage_UpdateReplicatedDataForMesh(
 	FGameplayAbilityRepAnimMontageForMesh& OutRepAnimMontageInfo)
 {
-	UAnimInstance* AnimInstance = IsValid(OutRepAnimMontageInfo.Mesh) && OutRepAnimMontageInfo.Mesh->GetOwner() 
+	const UAnimInstance* AnimInstance = IsValid(OutRepAnimMontageInfo.Mesh) && OutRepAnimMontageInfo.Mesh->GetOwner() 
 		== AbilityActorInfo->AvatarActor ? OutRepAnimMontageInfo.Mesh->GetAnimInstance() : nullptr;
-	FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(OutRepAnimMontageInfo.Mesh);
+	const FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(OutRepAnimMontageInfo.Mesh);
 
 	if (AnimInstance && AnimMontageInfo.LocalMontageInfo.AnimMontage)
 	{
 		OutRepAnimMontageInfo.RepMontageInfo.Animation = AnimMontageInfo.LocalMontageInfo.AnimMontage;
 
 		// Compressed Flags
-		bool bIsStopped = AnimInstance->Montage_GetIsStopped(AnimMontageInfo.LocalMontageInfo.AnimMontage);
+		const bool bIsStopped = AnimInstance->Montage_GetIsStopped(AnimMontageInfo.LocalMontageInfo.AnimMontage);
 
 		if (!bIsStopped)
 		{
@@ -525,10 +525,10 @@ void UPlayMontageAbilitySystemComponent::AnimMontage_UpdateReplicatedDataForMesh
 
 		// Replicate NextSectionID to keep it in sync.
 		// We actually replicate NextSectionID+1 on a BYTE to put INDEX_NONE in there.
-		int32 CurrentSectionID = AnimMontageInfo.LocalMontageInfo.AnimMontage->GetSectionIndexFromPosition(OutRepAnimMontageInfo.RepMontageInfo.Position);
+		const int32 CurrentSectionID = AnimMontageInfo.LocalMontageInfo.AnimMontage->GetSectionIndexFromPosition(OutRepAnimMontageInfo.RepMontageInfo.Position);
 		if (CurrentSectionID != INDEX_NONE)
 		{
-			int32 NextSectionID = AnimInstance->Montage_GetNextSectionID(AnimMontageInfo.LocalMontageInfo.AnimMontage, CurrentSectionID);
+			const int32 NextSectionID = AnimInstance->Montage_GetNextSectionID(AnimMontageInfo.LocalMontageInfo.AnimMontage, CurrentSectionID);
 			if (NextSectionID >= (256 - 1))
 			{
 				ABILITY_LOG(Error, TEXT("AnimMontage_UpdateReplicatedData. NextSectionID = %d.  RepAnimMontageInfo.Position: %.2f, CurrentSectionID: %d. LocalAnimMontageInfo.AnimMontage %s"),
@@ -556,7 +556,7 @@ void UPlayMontageAbilitySystemComponent::OnRep_ReplicatedAnimMontageForMesh()
 	{
 		FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(NewRepMontageInfoForMesh.Mesh);
 
-		UWorld* World = GetWorld();
+		const UWorld* World = GetWorld();
 
 		if (NewRepMontageInfoForMesh.RepMontageInfo.bSkipPlayRate)
 		{
@@ -580,7 +580,7 @@ void UPlayMontageAbilitySystemComponent::OnRep_ReplicatedAnimMontageForMesh()
 		if (!AbilityActorInfo->IsLocallyControlled())
 		{
 			static const auto CVar = IConsoleManager::Get().FindTConsoleVariableDataInt(TEXT("net.Montage.Debug"));
-			bool DebugMontage = (CVar && CVar->GetValueOnGameThread() == 1);
+			const bool DebugMontage = (CVar && CVar->GetValueOnGameThread() == 1);
 			if (DebugMontage)
 			{
 				ABILITY_LOG(Warning, TEXT("\n\nOnRep_ReplicatedAnimMontage, %s"), *GetNameSafe(this));
@@ -695,23 +695,23 @@ void UPlayMontageAbilitySystemComponent::ServerCurrentMontageSetNextSectionNameF
 	FName NextSectionName)
 {
 	UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
-	FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
+	const FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
 
 	if (AnimInstance)
 	{
-		UAnimMontage* CurrentAnimMontage = AnimMontageInfo.LocalMontageInfo.AnimMontage;
+		const UAnimMontage* CurrentAnimMontage = AnimMontageInfo.LocalMontageInfo.AnimMontage;
 		if (ClientAnimMontage == CurrentAnimMontage)
 		{
 			// Set NextSectionName
 			AnimInstance->Montage_SetNextSection(SectionName, NextSectionName, CurrentAnimMontage);
 
 			// Correct position if we are in an invalid section
-			float CurrentPosition = AnimInstance->Montage_GetPosition(CurrentAnimMontage);
-			int32 CurrentSectionID = CurrentAnimMontage->GetSectionIndexFromPosition(CurrentPosition);
-			FName CurrentSectionName = CurrentAnimMontage->GetSectionName(CurrentSectionID);
+			const float CurrentPosition = AnimInstance->Montage_GetPosition(CurrentAnimMontage);
+			const int32 CurrentSectionID = CurrentAnimMontage->GetSectionIndexFromPosition(CurrentPosition);
+			const FName CurrentSectionName = CurrentAnimMontage->GetSectionName(CurrentSectionID);
 
-			int32 ClientSectionID = CurrentAnimMontage->GetSectionIndexFromPosition(ClientPosition);
-			FName ClientCurrentSectionName = CurrentAnimMontage->GetSectionName(ClientSectionID);
+			const int32 ClientSectionID = CurrentAnimMontage->GetSectionIndexFromPosition(ClientPosition);
+			const FName ClientCurrentSectionName = CurrentAnimMontage->GetSectionName(ClientSectionID);
 			if ((CurrentSectionName != ClientCurrentSectionName) || (CurrentSectionName != SectionName))
 			{
 				// We are in an invalid section, jump to client's position.
@@ -738,11 +738,11 @@ void UPlayMontageAbilitySystemComponent::ServerCurrentMontageJumpToSectionNameFo
 	USkeletalMeshComponent* InMesh, UAnimMontage* ClientAnimMontage, FName SectionName)
 {
 	UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
-	FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
+	const FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
 
 	if (AnimInstance)
 	{
-		UAnimMontage* CurrentAnimMontage = AnimMontageInfo.LocalMontageInfo.AnimMontage;
+		const UAnimMontage* CurrentAnimMontage = AnimMontageInfo.LocalMontageInfo.AnimMontage;
 		if (ClientAnimMontage == CurrentAnimMontage)
 		{
 			// Set NextSectionName
@@ -767,11 +767,11 @@ void UPlayMontageAbilitySystemComponent::ServerCurrentMontageSetPlayRateForMesh_
 	USkeletalMeshComponent* InMesh, UAnimMontage* ClientAnimMontage, float InPlayRate)
 {
 	UAnimInstance* AnimInstance = IsValid(InMesh) && InMesh->GetOwner() == AbilityActorInfo->AvatarActor ? InMesh->GetAnimInstance() : nullptr;
-	FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
+	const FGameplayAbilityLocalAnimMontageForMesh& AnimMontageInfo = GetLocalAnimMontageInfoForMesh(InMesh);
 
 	if (AnimInstance)
 	{
-		UAnimMontage* CurrentAnimMontage = AnimMontageInfo.LocalMontageInfo.AnimMontage;
+		const UAnimMontage* CurrentAnimMontage = AnimMontageInfo.LocalMontageInfo.AnimMontage;
 		if (ClientAnimMontage == CurrentAnimMontage)
 		{
 			// Set PlayRate

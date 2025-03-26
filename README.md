@@ -74,6 +74,9 @@ Code was used from [GASShooter](https://github.com/tranek/GASShooter/)
 
 ## Changelog
 
+### 1.4.0
+* Add support for params, interface, or component
+
 ### 1.3.0
 * Refactor to PlayMontageAdvanced
 * Remove dependency on interface, allowing params to be used instead
