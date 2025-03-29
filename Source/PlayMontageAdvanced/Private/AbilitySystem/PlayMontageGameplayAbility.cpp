@@ -9,8 +9,13 @@
 // https://github.com/tranek/GASShooter
 
 
+UPlayMontageGameplayAbility::UPlayMontageGameplayAbility(const FObjectInitializer& ObjectInitializer)
+	:Super(ObjectInitializer)
+{
+}
+
 bool UPlayMontageGameplayAbility::FindAbilityMeshMontage(USkeletalMeshComponent* InMesh,
-	FAbilityMeshMontage& InAbilityMontage)
+                                                         FAbilityMeshMontage& InAbilityMontage)
 {
 	for (FAbilityMeshMontage& MeshMontage : CurrentAbilityMeshMontages)
 	{

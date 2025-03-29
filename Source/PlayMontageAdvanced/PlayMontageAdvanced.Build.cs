@@ -12,7 +12,7 @@ public class PlayMontageAdvanced : ModuleRules
 			new string[]
 			{
 				"Core",
-				"GameplayAbilities",
+				"GameplayAbilities", "AngelscriptGAS",
 			}
 			);
 			

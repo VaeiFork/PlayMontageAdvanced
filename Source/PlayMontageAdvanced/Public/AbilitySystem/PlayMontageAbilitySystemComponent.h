@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
+#include "AngelscriptAbilitySystemComponent.h"
 #include "PlayMontageAbilitySystemComponent.generated.h"
 
 // Most of this is from GASShooter and therefore also Copyright 2024 Dan Kestranek.
@@ -84,11 +85,13 @@ struct PLAYMONTAGEADVANCED_API FGameplayAbilityRepAnimMontageForMesh
 };
 
 UCLASS(ClassGroup=(AbilitySystem), meta=(BlueprintSpawnableComponent))
-class PLAYMONTAGEADVANCED_API UPlayMontageAbilitySystemComponent : public UAbilitySystemComponent
+class PLAYMONTAGEADVANCED_API UPlayMontageAbilitySystemComponent : public UAngelscriptAbilitySystemComponent
 {
 	GENERATED_BODY()
 
 public:
+	UPlayMontageAbilitySystemComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual bool GetShouldTick() const override;

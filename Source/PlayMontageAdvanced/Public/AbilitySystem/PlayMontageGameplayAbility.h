@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AngelscriptGASAbility.h"
 #include "Abilities/GameplayAbility.h"
 #include "PlayMontageGameplayAbility.generated.h"
 
@@ -31,11 +32,12 @@ struct PLAYMONTAGEADVANCED_API FAbilityMeshMontage
  * 
  */
 UCLASS()
-class PLAYMONTAGEADVANCED_API UPlayMontageGameplayAbility : public UGameplayAbility
+class PLAYMONTAGEADVANCED_API UPlayMontageGameplayAbility : public UAngelscriptGASAbility
 {
 	GENERATED_BODY()
 
 public:
+	UPlayMontageGameplayAbility(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	// ----------------------------------------------------------------------------------------------------------------
 	//	Animation Support for multiple USkeletalMeshComponents on the AvatarActor
 	// ----------------------------------------------------------------------------------------------------------------
