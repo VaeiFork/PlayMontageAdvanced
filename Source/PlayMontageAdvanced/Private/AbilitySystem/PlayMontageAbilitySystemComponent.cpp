@@ -32,6 +32,11 @@ bool FPlayTagGameplayAbilityRepAnimMontage::NetSerialize(FArchive& Ar, UPackageM
 	return true;
 }
 
+UPlayMontageAbilitySystemComponent::UPlayMontageAbilitySystemComponent(const FObjectInitializer& ObjectInitializer)
+	: Super()
+{
+}
+
 void UPlayMontageAbilitySystemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
