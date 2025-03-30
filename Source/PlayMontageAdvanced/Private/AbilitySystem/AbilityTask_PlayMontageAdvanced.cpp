@@ -506,6 +506,44 @@ bool UAbilityTask_PlayMontageAdvanced::StopPlayingMontage(float OverrideBlendOut
 	return false;
 }
 
+bool UAbilityTask_PlayMontageAdvanced::IsPlayingMontage() const
+{
+	if (Ability == nullptr)
+	{
+		return false;
+	}
+
+	const FGameplayAbilityActorInfo* ActorInfo = Ability->GetCurrentActorInfo();
+	if (ActorInfo == nullptr)
+	{
+		return false;
+	}
+
+	const UAnimInstance* AnimInstance = ActorInfo->GetAnimInstance();
+	if (AnimInstance == nullptr)
+	{
+		return false;
+	}
+
+	// Check if the montage is still playing
+	// The ability would have been interrupted, in which case we should automatically stop the montage
+	UPlayMontageAbilitySystemComponent* ASC = AbilitySystemComponent.IsValid() ?
+		Cast<UPlayMontageAbilitySystemComponent>(AbilitySystemComponent.Get()) : nullptr;
+
+	USkeletalMeshComponent* Mesh = ActorInfo && ActorInfo->SkeletalMeshComponent.IsValid() ? ActorInfo->SkeletalMeshComponent.Get() : nullptr;
+	
+	if (ASC && Ability && Mesh)
+	{
+		if (ASC->GetAnimatingAbilityFromMesh(Mesh) == Ability
+			&& ASC->GetCurrentMontageForMesh(Mesh) == MontageToPlay)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void UAbilityTask_PlayMontageAdvanced::OnGameplayEvent(FGameplayTag EventTag, const FGameplayEventData* Payload)
 {
 	if (ShouldBroadcastAbilityTaskDelegates())

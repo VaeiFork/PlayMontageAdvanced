@@ -263,12 +263,15 @@ public:
 
 	virtual FString GetDebugString() const override;
 
-protected:
-	virtual void OnDestroy(bool AbilityEnded) override;
-
 	/** Checks if the ability is playing a montage and stops that montage, returns true if a montage was stopped, false if not. */
+	UFUNCTION(BlueprintCallable)
 	bool StopPlayingMontage(float OverrideBlendOutTime = -1.f);
 
+	UFUNCTION(BlueprintCallable)
+	bool IsPlayingMontage() const;
+protected:
+	virtual void OnDestroy(bool AbilityEnded) override;
+	
 	void OnGameplayEvent(FGameplayTag EventTag, const FGameplayEventData* Payload);
 	
 	void BroadcastTagEvent(FAnimNotifyByTagEvent& TagEvent) const;
